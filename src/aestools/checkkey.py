@@ -47,8 +47,18 @@ THRESHOLD_DEFAULT = 126
 def bit_strength_gcm_auth(key):
     c = AES.new(key, AES.MODE_ECB)
     h = bytes_to_long(c.encrypt("\x00" * 16))
+    print("H = ", h)
     group_order = gf_2_128_order(h)
+    print("order = ", group_order)
     return group_order.bit_length() - 1
+
+def bit_strength_auth_key(key):
+    h = bytes_to_long(key)
+    print("H = ", h)
+    group_order = gf_2_128_order(h)
+    print("order = ", group_order)
+    return group_order.bit_length() - 1
+
 
 
 def is_key_safe(key, threshold=THRESHOLD_DEFAULT):

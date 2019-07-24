@@ -8,7 +8,7 @@ import argparse
 from binascii import hexlify, unhexlify
 import sys
 
-from aestools.checkkey import is_key_safe, selftest, THRESHOLD_DEFAULT, bit_strength_gcm_auth
+from aestools.checkkey import is_key_safe, selftest, THRESHOLD_DEFAULT, bit_strength_gcm_auth, bit_strength_auth_key
 from aestools.safekey import get_safe_key
 
 
@@ -50,6 +50,11 @@ def main():
                               help='key in hex representation')
     parser_check.add_argument('--threshold', dest='threshold', type=valid_threshold,
                               default=THRESHOLD_DEFAULT, help='safety threshold')
+    parser_check = subparsers.add_parser('hcheck', help='check a GCM Hash key')
+    parser_check.add_argument('key', type=valid_key,
+                              help='key in hex representation')
+    parser_check.add_argument('--threshold', dest='threshold', type=valid_threshold,
+                              default=THRESHOLD_DEFAULT, help='safety threshold')
     parser_generate = subparsers.add_parser('generate', help='generate a safe AES GCM key')
     parser_generate.add_argument('bits', type=valid_bits,
                                  help='key length, 128 or 256')
@@ -60,6 +65,16 @@ def main():
         strength = bit_strength_gcm_auth(args.key)
         safe = strength >= args.threshold
         print("%s is safe: %r (%i bits security)" % (hexlify(args.key).decode('ascii'), safe, strength))
+        return 0 if safe else 1
+
+    if args.cmd == 'hcheck':
+        selftest()
+        strength = bit_strength_auth_key(args.key)
+        safe = strength >= args.threshold
+        if (safe):
+            print("%s is safe: %r (%i bits security)" % (hexlify(args.key).decode('ascii'), safe, strength))
+        else:
+            print("%s is *NOT* safe: %r (%i bits security)" % (hexlify(args.key).decode('ascii'), safe, strength))
         return 0 if safe else 1
 
     if args.cmd == 'generate':
