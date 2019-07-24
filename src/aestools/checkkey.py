@@ -8,6 +8,7 @@ from Crypto.Util.number import bytes_to_long
 # Utility Functions ############################################################
 
 
+# Return x * y under GF 128
 def gf_2_128_mul(x, y):
     assert x < (1 << 128)
     assert y < (1 << 128)
@@ -19,6 +20,8 @@ def gf_2_128_mul(x, y):
     return res
 
 
+# Return exponentiation of x ** n by squaring
+# described in https://en.wikipedia.org/wiki/Exponentiation_by_squaring#Basic_method
 def gf_2_128_exp(x, n):
     if n == 0:
         return (1 << 127)
@@ -29,6 +32,7 @@ def gf_2_128_exp(x, n):
         return gf_2_128_exp(gf_2_128_mul(x, x), q)
 
 
+# Return order of x by trying all factors in group
 def gf_2_128_order(x):
     factors = (3, 5, 17, 257, 641, 65537, 274177, 6700417, 67280421310721)
     order = 1
@@ -44,6 +48,7 @@ def gf_2_128_order(x):
 THRESHOLD_DEFAULT = 126
 
 
+# Return the order of the AUTH (Hashing) Key
 def bit_strength_gcm_auth(key):
     c = AES.new(key, AES.MODE_ECB)
     h = bytes_to_long(c.encrypt("\x00" * 16))
@@ -52,6 +57,7 @@ def bit_strength_gcm_auth(key):
     print("order = ", group_order)
     return group_order.bit_length() - 1
 
+# Return the order of the AUTH (Hashing) Key
 def bit_strength_auth_key(key):
     h = bytes_to_long(key)
     print("H = ", h)
